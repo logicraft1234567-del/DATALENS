@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0a0f26">
+  <title>DataLens - Smarter Data. Better Decisions.</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/logo.png') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <div id="toasts" class="toasts" role="status" aria-live="polite"></div>
+
+  <div id="boot" class="boot" aria-label="Loading">
+    <img src="{{ url_for('static', filename='image/logo.png') }}" alt="" width="56" height="56">
+    <div class="spinner" aria-hidden="true"></div>
+  </div>
+
+  <!-- ===================== AUTHENTICATION ===================== -->
+  <main id="auth-screen" class="auth" hidden>
+    <section class="auth-brand">
+      <div class="brand-row">
+        <img src="{{ url_for('static', filename='image/logo.png') }}" alt="DataLens logo" width="52" height="52">
+        <div>
+          <p class="brand-name">DataLens</p>
+          <p class="brand-tag">Smarter data. Better decisions.</p>
+        </div>
+      </div>
+      <h1 class="auth-headline">Upload a CSV. Understand it in minutes.</h1>
+      <ul class="auth-points">
+        <li><i data-lucide="chart-no-axes-column"></i><span><strong>Instant statistics and charts</strong> calculated from your real data.</span></li>
+        <li><i data-lucide="shield-check"></i><span><strong>Data-quality checks</strong> for missing values, duplicates and outliers.</span></li>
+        <li><i data-lucide="sparkles"></i><span><strong>Ask questions in plain English</strong> and get answers grounded in your dataset.</span></li>
+        <li><i data-lucide="cpu"></i><span><strong>Full AI analysis and your own AI model</strong> trained on the data you upload.</span></li>
+      </ul>
+      <p class="auth-foot">Your datasets, chats and reports stay private to your account.</p>
+    </section>
+
+    <section class="auth-card card" aria-labelledby="auth-title">
+      <div class="auth-mobile-brand">
+        <img src="{{ url_for('static', filename='image/logo.png') }}" alt="" width="40" height="40">
+        <span class="brand-name">DataLens</span>
+      </div>
+      <div class="segmented" role="tablist" aria-label="Account">
+        <button type="button" role="tab" id="tab-login" class="seg active" data-auth-tab="login" aria-selected="true">Log in</button>
+        <button type="button" role="tab" id="tab-signup" class="seg" data-auth-tab="signup" aria-selected="false">Sign up</button>
+      </div>
+
+      <form id="login-form" class="form" novalidate data-auth-form="login" aria-labelledby="tab-login">
+        <h2 id="auth-title">Welcome back</h2>
+        <p class="muted">Log in to continue to your dashboard.</p>
+        <div class="form-alert" data-form-alert hidden role="alert"></div>
+        <div class="field">
+          <label for="login-identifier">Email or username</label>
+          <input id="login-identifier" name="identifier" type="text" autocomplete="username" required>
+          <p class="field-error" data-error-for="identifier"></p>
+        </div>
+        <div class="field">
+          <label for="login-password">Password</label>
+          <div class="input-wrap">
+            <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+            <button type="button" class="icon-btn pw-toggle" data-toggle-password="login-password" aria-label="Show password"><i data-lucide="eye"></i></button>
+          </div>
+          <p class="field-error" data-error-for="password"></p>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit"><span class="btn-label">Log in</span></button>
+        <p class="switch-line">New to DataLens? <button type="button" class="link-btn" data-auth-tab="signup">Create an account</button></p>
+      </form>
+
+      <form id="signup-form" class="form" novalidate hidden data-auth-form="signup" aria-labelledby="tab-signup">
+        <h2>Create your account</h2>
+        <p class="muted">It takes less than a minute.</p>
+        <div class="form-alert" data-form-alert hidden role="alert"></div>
+        <div class="field">
+          <label for="su-name">Full name</label>
+          <input id="su-name" name="full_name" type="text" autocomplete="name" maxlength="80" required>
+          <p class="field-error" data-error-for="full_name"></p>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="su-username">Username</label>
+            <input id="su-username" name="username" type="text" autocomplete="username" maxlength="30" required>
+            <p class="field-error" data-error-for="username"></p>
+          </div>
+          <div class="field">
+            <label for="su-email">Email</label>
+            <input id="su-email" name="email" type="email" autocomplete="email" maxlength="254" required>
+            <p class="field-error" data-error-for="email"></p>
+          </div>
+        </div>
+        <div class="field">
+          <label for="su-password">Password</label>
+          <div class="input-wrap">
+            <input id="su-password" name="password" type="password" autocomplete="new-password" required aria-describedby="su-pw-hint">
+            <button type="button" class="icon-btn pw-toggle" data-toggle-password="su-password" aria-label="Show password"><i data-lucide="eye"></i></button>
+          </div>
+          <p class="hint" id="su-pw-hint">At least 8 characters with a letter and a number.</p>
+          <p class="field-error" data-error-for="password"></p>
+        </div>
+        <div class="field">
+          <label for="su-confirm">Confirm password</label>
+          <input id="su-confirm" name="confirm_password" type="password" autocomplete="new-password" required>
+          <p class="field-error" data-error-for="confirm_password"></p>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit"><span class="btn-label">Create account</span></button>
+        <p class="switch-line">Already have an account? <button type="button" class="link-btn" data-auth-tab="login">Log in</button></p>
+      </form>
+    </section>
+  </main>
+
+  <!-- ===================== APPLICATION ===================== -->
+  <div id="app-shell" class="shell" hidden>
+    <aside id="sidebar" class="sidebar" aria-label="Main navigation">
+      <div class="sidebar-top">
+        <a class="brand-row" href="#/dashboard" aria-label="DataLens dashboard">
+          <img src="{{ url_for('static', filename='image/logo.png') }}" alt="" width="40" height="40">
+          <div>
+            <p class="brand-name">DataLens</p>
+            <p class="brand-tag">Smarter data. Better decisions.</p>
+          </div>
+        </a>
+        <button type="button" class="icon-btn drawer-close" id="drawer-close" aria-label="Close menu"><i data-lucide="x"></i></button>
+      </div>
+      <nav class="nav">
+        <a class="nav-link" href="#/dashboard" data-nav="dashboard"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a>
+        <a class="nav-link" href="#/upload" data-nav="upload"><i data-lucide="upload"></i><span>Upload CSV</span></a>
+        <a class="nav-link" href="#/datasets" data-nav="datasets"><i data-lucide="database"></i><span>My datasets</span></a>
+        <a class="nav-link" href="#/analysis" data-nav="analysis"><i data-lucide="chart-no-axes-column"></i><span>Analyses</span></a>
+        <a class="nav-link" href="#/chat" data-nav="chat"><i data-lucide="message-square"></i><span>AI chat</span><span class="pill pill-new">New</span></a>
+        <a class="nav-link" href="#/assistants" data-nav="assistants"><i data-lucide="bot"></i><span>My AIs</span><span class="pill pill-new">New</span></a>
+        <a class="nav-link" href="#/api" data-nav="api"><i data-lucide="code-xml"></i><span>API &amp; Developers</span></a>
+        <a class="nav-link" href="#/reports" data-nav="reports"><i data-lucide="file-text"></i><span>Reports</span></a>
+        <a class="nav-link" href="#/settings" data-nav="settings"><i data-lucide="settings"></i><span>Settings</span></a>
+        <div id="admin-nav" hidden>
+          <p class="nav-heading">Admin</p>
+          <a class="nav-link" href="#/admin-users" data-nav="admin-users"><i data-lucide="users"></i><span>User management</span></a>
+          <a class="nav-link" href="#/admin-analytics" data-nav="admin-analytics"><i data-lucide="activity"></i><span>Analytics</span></a>
+          <a class="nav-link" href="#/admin-logs" data-nav="admin-logs"><i data-lucide="terminal"></i><span>System logs</span></a>
+        </div>
+      </nav>
+      <div class="help-card">
+        <p class="help-title">Need help?</p>
+        <p class="muted small">Ask the AI assistant about your data or explore the features.</p>
+        <a class="btn btn-soft btn-block" href="#/chat"><i data-lucide="message-square"></i>Open AI chat</a>
+      </div>
+    </aside>
+    <div id="scrim" class="scrim" hidden></div>
+
+    <div class="main-col">
+      <header class="topbar">
+        <button type="button" class="icon-btn" id="menu-btn" aria-label="Open menu" aria-controls="sidebar" aria-expanded="false"><i data-lucide="menu"></i></button>
+        <img class="topbar-logo" src="{{ url_for('static', filename='image/logo.png') }}" alt="DataLens" width="28" height="28">
+        <h1 id="page-title" class="page-title">Dashboard</h1>
+        <form id="global-search-form" class="search" role="search">
+          <i data-lucide="search"></i>
+          <input id="global-search" type="search" placeholder="Search datasets…" aria-label="Search datasets" autocomplete="off">
+        </form>
+        <div class="user-menu-wrap">
+          <button type="button" class="user-btn" id="user-menu-btn" aria-haspopup="true" aria-expanded="false">
+            <span class="avatar" id="user-avatar">U</span>
+            <span class="user-btn-name" id="user-btn-name">User</span>
+            <i data-lucide="chevron-down"></i>
+          </button>
+          <div class="menu" id="user-menu" hidden>
+            <div class="menu-head"><p id="um-name" class="strong"></p><p id="um-email" class="muted small"></p></div>
+            <a class="menu-item" href="#/settings"><i data-lucide="user"></i>Account settings</a>
+            <a class="menu-item" href="#/settings" data-focus="password"><i data-lucide="key-round"></i>Change password</a>
+            <button type="button" class="menu-item" data-action="logout"><i data-lucide="log-out"></i>Log out</button>
+          </div>
+        </div>
+      </header>
+
+      <main id="content" class="content" tabindex="-1">
+
+        <!-- ---------- Dashboard ---------- -->
+        <section class="view" data-view="dashboard" hidden>
+          <div class="page-head">
+            <div>
+              <h2 id="dash-greeting">Welcome</h2>
+              <p class="muted">Here's what's happening with your data.</p>
+            </div>
+            <div class="head-actions">
+              <label class="sr-only" for="dash-range">Time range</label>
+              <select id="dash-range" class="select"><option value="7">Last 7 days</option><option value="30">Last 30 days</option></select>
+              <a class="btn btn-primary" href="#/upload"><i data-lucide="upload"></i>Upload CSV</a>
+            </div>
+          </div>
+          <div class="grid stats" id="dash-stats"></div>
+          <div class="grid dash-2">
+            <article class="card"><div class="card-head"><h3>Uploads and analyses</h3></div><div class="chart-box"><canvas id="dash-trend" role="img" aria-label="Uploads and analyses per day"></canvas></div></article>
+            <article class="card"><div class="card-head"><h3>Feature usage</h3><span class="muted small">Last 30 days</span></div>
+              <div class="donut-wrap"><div class="donut-box"><canvas id="dash-usage" role="img" aria-label="Feature usage"></canvas><div class="donut-center" id="dash-usage-total"></div></div><ul class="legend" id="dash-usage-legend"></ul></div></article>
+            <article class="card"><div class="card-head"><h3>Recent activity</h3></div><ul class="feed" id="dash-activity"></ul></article>
+          </div>
+          <div class="grid dash-3">
+            <article class="card"><div class="card-head"><h3>Recent datasets</h3><a class="link" href="#/datasets">View all</a></div><div class="table-wrap"><table class="table" id="dash-datasets"></table></div><div id="dash-datasets-empty"></div></article>
+            <article class="card"><div class="card-head"><h3>Data quality overview</h3><select id="dash-ds-select" class="select select-sm" aria-label="Dataset for quality overview"></select></div><div id="dash-quality"></div></article>
+            <article class="card"><div class="card-head"><h3>Quick actions</h3></div>
+              <div class="quick">
+                <a class="quick-btn q-primary" href="#/upload"><i data-lucide="upload"></i><span><strong>Upload CSV</strong><small>Analyze your data</small></span></a>
+                <a class="quick-btn" href="#/chat"><i data-lucide="message-square"></i><span><strong>AI chat</strong><small>Ask about your data</small></span></a>
+                <a class="quick-btn" href="#/analysis"><i data-lucide="chart-no-axes-column"></i><span><strong>New analysis</strong><small>Explore visually</small></span></a>
+                <a class="quick-btn" href="#/reports"><i data-lucide="file-text"></i><span><strong>Reports</strong><small>Download results</small></span></a>
+              </div>
+              <div class="profile-mini" id="dash-profile"></div></article>
+          </div>
+          <div class="grid dash-4">
+            <article class="card"><div class="card-head"><h3>Latest AI conversations</h3><a class="link" href="#/chat">View all</a></div><ul class="feed" id="dash-convs"></ul></article>
+            <article class="card"><div class="card-head"><h3>Top insights</h3><a class="link" href="#/analysis" id="dash-insights-link">View all</a></div><ul class="feed" id="dash-insights"></ul></article>
+          </div>
+        </section>
+
+        <!-- ---------- Upload ---------- -->
+        <section class="view" data-view="upload" hidden>
+          <div class="page-head"><div><h2>Upload a CSV</h2><p class="muted">Add a dataset to analyze. Files stay private to your account.</p></div></div>
+          <div class="grid upload-grid">
+            <article class="card">
+              <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Choose a CSV file or drop it here">
+                <i data-lucide="file-spreadsheet" class="dz-icon"></i>
+                <p class="dz-title">Drag and drop your CSV here</p>
+                <p class="muted">or</p>
+                <button type="button" class="btn btn-primary" id="pick-file">Choose a file</button>
+                <input id="file-input" type="file" accept=".csv,.tsv,.txt,text/csv" hidden>
+                <p class="muted small" id="upload-limits">CSV, TSV or delimited text. UTF-8 recommended.</p>
+              </div>
+              <div id="upload-progress" class="upload-progress" hidden>
+                <div class="progress-row"><span id="upload-file-name" class="strong"></span><span id="upload-pct" class="muted small">0%</span></div>
+                <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="upload-bar"><span></span></div>
+                <p class="muted small" id="upload-status"></p>
+              </div>
+              <div id="upload-result"></div>
+            </article>
+            <article class="card">
+              <h3>What happens next</h3>
+              <ul class="steps">
+                <li><i data-lucide="scan-search"></i><span><strong>Validation.</strong> We check encoding, delimiter, headers and row consistency.</span></li>
+                <li><i data-lucide="sigma"></i><span><strong>Statistics.</strong> Summary numbers are calculated from every row.</span></li>
+                <li><i data-lucide="shield-check"></i><span><strong>Quality checks.</strong> Missing values, duplicates and possible outliers are flagged.</span></li>
+                <li><i data-lucide="message-square"></i><span><strong>Ask questions.</strong> Chat with the AI assistant about your dataset.</span></li>
+                <li><i data-lucide="cpu"></i><span><strong>AI analysis and training.</strong> Get a full written analysis, or train a small model to predict a column.</span></li>
+              </ul>
+              <p class="muted small">Cells starting with = + - @ are treated as plain text and are never run as formulas.</p>
+            </article>
+          </div>
+        </section>
+
+        <!-- ---------- Datasets ---------- -->
+        <section class="view" data-view="datasets" hidden>
+          <div class="page-head">
+            <div><h2>My datasets</h2><p class="muted" id="datasets-count"></p></div>
+            <div class="head-actions">
+              <label class="sr-only" for="datasets-search">Filter datasets</label>
+              <input id="datasets-search" class="input input-sm" type="search" placeholder="Filter by name…">
+              <label class="sr-only" for="datasets-sort">Sort datasets</label>
+              <select id="datasets-sort" class="select"><option value="recent">Newest first</option><option value="name">Name</option><option value="rows">Most rows</option></select>
+              <a class="btn btn-primary" href="#/upload"><i data-lucide="plus"></i>Upload CSV</a>
+            </div>
+          </div>
+          <div id="datasets-list" class="dataset-cards"></div>
+        </section>
+
+        <!-- ---------- Analysis workspace ---------- -->
+        <section class="view" data-view="analysis" hidden>
+          <div class="page-head">
+            <div class="ds-title">
+              <label class="sr-only" for="an-select">Dataset</label>
+              <select id="an-select" class="select select-lg"></select>
+              <p class="muted small" id="an-meta"></p>
+            </div>
+            <div class="head-actions" id="an-actions" hidden>
+              <button type="button" class="btn btn-soft" id="an-ask"><i data-lucide="message-square"></i>Ask AI</button>
+              <button type="button" class="btn btn-soft" id="an-rename"><i data-lucide="pencil"></i>Rename</button>
+              <button type="button" class="btn btn-soft" id="an-report"><i data-lucide="file-down"></i>PDF report</button>
+              <button type="button" class="btn btn-danger-soft" id="an-delete"><i data-lucide="trash-2"></i>Delete</button>
+            </div>
+          </div>
+          <div id="an-empty"></div>
+          <div id="an-body" hidden>
+            <div class="tabs" role="tablist" aria-label="Analysis sections" id="an-tabs">
+              <button type="button" role="tab" class="tab active" data-tab="overview" aria-selected="true">Overview</button>
+              <button type="button" role="tab" class="tab" data-tab="statistics" aria-selected="false">Statistics</button>
+              <button type="button" role="tab" class="tab" data-tab="quality" aria-selected="false">Data quality</button>
+              <button type="button" role="tab" class="tab" data-tab="charts" aria-selected="false">Charts</button>
+              <button type="button" role="tab" class="tab" data-tab="explorer" aria-selected="false">Explorer</button>
+              <button type="button" role="tab" class="tab" data-tab="clean" aria-selected="false">Clean</button>
+              <button type="button" role="tab" class="tab" data-tab="insights" aria-selected="false">Insights</button>
+              <button type="button" role="tab" class="tab" data-tab="aireport" aria-selected="false"><i data-lucide="sparkles"></i>AI analysis</button>
+              <button type="button" role="tab" class="tab" data-tab="train" aria-selected="false"><i data-lucide="cpu"></i>Train AI</button>
+            </div>
+
+            <div class="tab-panel" data-panel="overview">
+              <div class="grid stats stats-6" id="ov-stats"></div>
+              <article class="card"><div class="card-head"><h3>What these numbers mean</h3></div><ul class="explain" id="ov-explain"></ul></article>
+              <article class="card"><div class="card-head"><h3>Columns</h3></div><div class="table-wrap"><table class="table" id="ov-columns"></table></div></article>
+              <article class="card"><div class="card-head"><h3>Suggested charts</h3></div><div class="chips" id="ov-suggest"></div></article>
+              <article class="card"><div class="card-head"><h3>Downloads</h3></div>
+                <div class="btn-row" id="ov-downloads"></div></article>
+            </div>
+
+            <div class="tab-panel" data-panel="statistics" hidden>
+              <article class="card"><div class="card-head"><h3>Numeric columns</h3></div><div class="table-wrap"><table class="table sortable" id="st-numeric"></table></div><div id="st-numeric-empty"></div></article>
+              <article class="card"><div class="card-head"><h3>Categorical columns</h3></div><div class="cat-grid" id="st-cats"></div><div id="st-cats-empty"></div></article>
+              <article class="card"><div class="card-head"><h3>Date and time columns</h3></div><div class="table-wrap"><table class="table" id="st-dates"></table></div><div id="st-dates-empty"></div></article>
+            </div>
+
+            <div class="tab-panel" data-panel="quality" hidden>
+              <div class="grid stats stats-4" id="q-stats"></div>
+              <article class="card"><div class="card-head"><h3>Missing values by column</h3></div><div class="table-wrap"><table class="table sortable" id="q-missing"></table></div></article>
+              <div class="grid two">
+                <article class="card"><div class="card-head"><h3>Duplicates and structure</h3></div><div id="q-struct"></div></article>
+                <article class="card"><div class="card-head"><h3>Possible outliers</h3></div><p class="muted small" id="q-outlier-note"></p><div class="table-wrap"><table class="table" id="q-outliers"></table></div><div id="q-outliers-empty"></div></article>
+              </div>
+            </div>
+
+            <div class="tab-panel" data-panel="charts" hidden>
+              <article class="card">
+                <div class="chart-controls" id="ch-controls">
+                  <div class="field"><label for="ch-type">Chart type</label><select id="ch-type" class="select"></select></div>
+                  <div id="ch-fields" class="chart-fields"></div>
+                  <button type="button" class="btn btn-primary" id="ch-draw"><i data-lucide="chart-no-axes-column"></i>Draw chart</button>
+                </div>
+              </article>
+              <article class="card chart-card">
+                <div class="card-head"><h3 id="ch-title">Choose a chart</h3><button type="button" class="btn btn-soft btn-sm" id="ch-ask" hidden><i data-lucide="message-square"></i>Ask AI about this chart</button></div>
+                <div id="ch-message" class="empty-inline"></div>
+                <div class="chart-box chart-box-lg" id="ch-box" hidden><canvas id="ch-canvas" role="img" aria-label="Selected chart"></canvas></div>
+                <div class="heatmap-wrap" id="ch-heatmap" hidden></div>
+                <p class="muted small" id="ch-note"></p>
+              </article>
+              <article class="card"><div class="card-head"><h3>Suggested for this dataset</h3></div><div class="chips" id="ch-suggest"></div></article>
+            </div>
+
+            <div class="tab-panel" data-panel="explorer" hidden>
+              <article class="card">
+                <div class="toolbar">
+                  <div class="search search-inline"><i data-lucide="search"></i><input id="ex-search" type="search" placeholder="Search all visible columns…" aria-label="Search rows"></div>
+                  <button type="button" class="btn btn-soft btn-sm" id="ex-cols-btn"><i data-lucide="columns-3"></i>Columns</button>
+                  <button type="button" class="btn btn-soft btn-sm" id="ex-filter-btn"><i data-lucide="filter"></i>Add filter</button>
+                  <label class="check"><input type="checkbox" id="ex-dups"><span>Duplicates only</span></label>
+                  <label class="sr-only" for="ex-size">Rows per page</label>
+                  <select id="ex-size" class="select select-sm"><option>25</option><option>50</option><option>100</option></select>
+                </div>
+                <div class="filters" id="ex-filters"></div>
+                <div class="col-picker" id="ex-col-picker" hidden></div>
+                <div class="table-wrap table-wrap-tall"><table class="table data-table" id="ex-table"></table></div>
+                <div class="pager" id="ex-pager"></div>
+              </article>
+            </div>
+
+            <div class="tab-panel" data-panel="clean" hidden>
+              <div class="grid two">
+                <article class="card">
+                  <div class="card-head"><h3>Clean this dataset</h3></div>
+                  <p class="muted small">Cleaning never changes your uploaded file. Preview a step, apply it, and undo or reset whenever you like.</p>
+                  <div class="field"><label for="cl-op">Cleaning step</label>
+                    <select id="cl-op" class="select">
+                      <option value="drop_duplicates">Remove duplicate rows</option>
+                      <option value="drop_missing">Remove rows with missing values</option>
+                      <option value="fill_numeric">Fill missing numbers</option>
+                      <option value="fill_categorical">Fill missing text</option>
+                      <option value="convert_type">Convert text columns to numbers or dates</option>
+                      <option value="rename">Rename a column</option>
+                      <option value="drop_columns">Remove columns</option>
+                      <option value="filter">Keep only rows that match</option>
+                    </select></div>
+                  <div id="cl-fields" class="chart-fields"></div>
+                  <div class="btn-row"><button type="button" class="btn btn-soft" id="cl-preview"><i data-lucide="eye"></i>Preview impact</button><button type="button" class="btn btn-primary" id="cl-apply"><i data-lucide="check"></i>Apply step</button></div>
+                  <div id="cl-preview-box" class="preview-box" hidden></div>
+                </article>
+                <article class="card">
+                  <div class="card-head"><h3>Applied steps</h3><div class="btn-row"><button type="button" class="btn btn-soft btn-sm" id="cl-undo"><i data-lucide="undo-2"></i>Undo last</button><button type="button" class="btn btn-danger-soft btn-sm" id="cl-reset"><i data-lucide="rotate-ccw"></i>Reset all</button></div></div>
+                  <ol class="applied" id="cl-steps"></ol>
+                  <div id="cl-steps-empty"></div>
+                </article>
+              </div>
+            </div>
+
+            <div class="tab-panel" data-panel="insights" hidden>
+              <article class="card"><div class="card-head"><h3>Insights from your data</h3></div>
+                <p class="muted small">Observations are measured from the data. Interpretations are suggestions, not proven facts.</p>
+                <ul class="insights" id="in-list"></ul></article>
+            </div>
+
+            <div class="tab-panel" data-panel="aireport" hidden>
+              <article class="card">
+                <div class="card-head">
+                  <div><h3>Full AI analysis</h3><p class="muted small" id="air-meta"></p></div>
+                  <div class="btn-row">
+                    <button type="button" class="btn btn-soft btn-sm" id="air-copy" hidden><i data-lucide="copy"></i>Copy</button>
+                    <button type="button" class="btn btn-soft btn-sm" id="air-chat"><i data-lucide="message-square"></i>Ask follow-up questions</button>
+                    <button type="button" class="btn btn-primary" id="air-run"><i data-lucide="sparkles"></i><span id="air-run-label">Run full AI analysis</span></button>
+                  </div>
+                </div>
+                <p class="muted small">DataLens calculates the numbers from every row first, then the AI turns them into a written report: summary, data quality, findings, patterns, risks and next steps. AI can make mistakes, so check important figures.</p>
+                <div class="notice" id="air-stale" hidden role="status">You changed the cleaning steps after this report was written. Run it again to match the data as it is now.</div>
+                <div id="air-body"></div>
+              </article>
+            </div>
+
+            <div class="tab-panel" data-panel="train" hidden>
+              <div class="grid two">
+                <article class="card"><div class="card-head"><h3>Train your own AI</h3></div>
+                  <p class="muted small">Teach a small prediction model using this dataset. Pick a column to predict and DataLens learns the pattern from the other columns.</p>
+                  <div id="ml-form-box"></div></article>
+                <article class="card"><div class="card-head"><h3>Your models for this dataset</h3></div>
+                  <ul class="conv-list" id="ml-list"></ul><div id="ml-list-empty"></div></article>
+              </div>
+              <div class="ml-detail" id="ml-detail" hidden></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------- AI chat ---------- -->
+        <section class="view" data-view="chat" hidden>
+          <div class="chat-layout" id="chat-layout">
+            <aside class="chat-side card" id="chat-side">
+              <div class="field"><label for="chat-ds">Dataset</label><select id="chat-ds" class="select"></select></div>
+              <button type="button" class="btn btn-primary btn-block" id="chat-new"><i data-lucide="plus"></i>New conversation</button>
+              <ul class="conv-list" id="chat-convs"></ul>
+              <div id="chat-convs-empty"></div>
+              <button type="button" class="btn btn-danger-soft btn-block btn-sm" id="chat-clear"><i data-lucide="trash-2"></i>Delete all chat history</button>
+            </aside>
+            <section class="chat-main card" aria-label="AI data chat">
+              <header class="chat-head">
+                <button type="button" class="icon-btn chat-back" id="chat-back" aria-label="Back to conversations"><i data-lucide="chevron-left"></i></button>
+                <div class="chat-head-text"><h2 id="chat-title">AI data chat</h2><p class="muted small" id="chat-ds-badge"></p></div>
+                <div class="btn-row">
+                  <button type="button" class="icon-btn" id="chat-rename" aria-label="Rename conversation" hidden><i data-lucide="pencil"></i></button>
+                  <button type="button" class="icon-btn" id="chat-delete" aria-label="Delete conversation" hidden><i data-lucide="trash-2"></i></button>
+                </div>
+              </header>
+              <div class="ai-banner" id="chat-banner" hidden role="status"></div>
+              <div class="messages" id="chat-messages" aria-live="polite"></div>
+              <div class="chat-suggest" id="chat-suggest"></div>
+              <div class="attach" id="chat-attach" hidden><i data-lucide="chart-no-axes-column"></i><span id="chat-attach-text"></span><button type="button" class="icon-btn" id="chat-attach-x" aria-label="Remove chart context"><i data-lucide="x"></i></button></div>
+              <form class="composer" id="chat-form">
+                <label class="sr-only" for="chat-input">Ask a question about your data</label>
+                <textarea id="chat-input" rows="1" maxlength="2000" placeholder="Ask about this dataset…"></textarea>
+                <button type="submit" class="btn btn-primary send-btn" id="chat-send" aria-label="Send"><i data-lucide="send"></i></button>
+              </form>
+              <p class="muted small chat-foot" id="chat-foot">Answers use calculations from your data. AI can make mistakes; verify important figures.</p>
+            </section>
+          </div>
+        </section>
+
+        <!-- ---------- My AIs (Build Your AI) ---------- -->
+        <section class="view" data-view="assistants" hidden><div id="as-root"></div></section>
+
+        <!-- ---------- API & Developers ---------- -->
+        <section class="view" data-view="api" hidden><div id="api-root"></div></section>
+
+        <!-- ---------- Reports ---------- -->
+        <section class="view" data-view="reports" hidden>
+          <div class="page-head"><div><h2>Reports and downloads</h2><p class="muted">Export your data and analysis results.</p></div></div>
+          <article class="card"><div class="table-wrap"><table class="table" id="rep-table"></table></div><div id="rep-empty"></div></article>
+        </section>
+
+        <!-- ---------- Settings ---------- -->
+        <section class="view" data-view="settings" hidden>
+          <div class="page-head"><div><h2>Account settings</h2><p class="muted">Manage your profile, password and data.</p></div></div>
+          <div class="grid two">
+            <article class="card"><h3>Profile</h3>
+              <form id="profile-form" class="form" novalidate>
+                <div class="form-alert" data-form-alert hidden role="alert"></div>
+                <div class="field"><label for="pf-name">Full name</label><input id="pf-name" name="full_name" type="text" maxlength="80"><p class="field-error" data-error-for="full_name"></p></div>
+                <div class="field"><label for="pf-username">Username</label><input id="pf-username" type="text" disabled></div>
+                <div class="field"><label for="pf-email">Email</label><input id="pf-email" name="email" type="email" maxlength="254"><p class="field-error" data-error-for="email"></p></div>
+                <button class="btn btn-primary" type="submit"><span class="btn-label">Save changes</span></button>
+              </form></article>
+            <article class="card" id="pw-card"><h3>Change password</h3>
+              <form id="password-form" class="form" novalidate>
+                <div class="form-alert" data-form-alert hidden role="alert"></div>
+                <div class="field"><label for="pw-current">Current password</label><input id="pw-current" name="current_password" type="password" autocomplete="current-password"><p class="field-error" data-error-for="current_password"></p></div>
+                <div class="field"><label for="pw-new">New password</label><input id="pw-new" name="new_password" type="password" autocomplete="new-password"><p class="hint">At least 8 characters with a letter and a number.</p><p class="field-error" data-error-for="new_password"></p></div>
+                <div class="field"><label for="pw-confirm">Confirm new password</label><input id="pw-confirm" name="confirm_password" type="password" autocomplete="new-password"><p class="field-error" data-error-for="confirm_password"></p></div>
+                <button class="btn btn-primary" type="submit"><span class="btn-label">Update password</span></button>
+              </form></article>
+            <article class="card"><h3>AI assistant</h3><div id="set-ai"></div></article>
+            <article class="card"><h3>Your data</h3>
+              <p class="muted small">Datasets are stored privately on the server until you delete them. Deleting a dataset removes its file, cleaning steps and conversations.</p>
+              <div class="btn-row"><button type="button" class="btn btn-danger-soft" id="set-clear-chats"><i data-lucide="trash-2"></i>Delete all chat history</button>
+              <button type="button" class="btn btn-danger-soft" id="set-delete-account"><i data-lucide="user-x"></i>Delete my account</button></div></article>
+          </div>
+        </section>
+
+        <!-- ---------- Admin ---------- -->
+        <section class="view" data-view="admin-analytics" hidden>
+          <div class="page-head"><div><h2>Platform analytics</h2><p class="muted" id="ad-updated">Real usage recorded in the database.</p></div>
+            <div class="head-actions"><label class="sr-only" for="ad-range">Time range</label><select id="ad-range" class="select"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option></select></div></div>
+          <div class="grid stats stats-6" id="ad-stats"></div>
+          <div class="grid two">
+            <article class="card"><div class="card-head"><h3>New registrations</h3></div><div class="chart-box"><canvas id="ad-signups" role="img" aria-label="New registrations over time"></canvas></div></article>
+            <article class="card"><div class="card-head"><h3>Uploads and analyses</h3></div><div class="chart-box"><canvas id="ad-uploads" role="img" aria-label="Uploads and analyses over time"></canvas></div></article>
+            <article class="card"><div class="card-head"><h3>AI requests</h3></div><div class="chart-box"><canvas id="ad-ai" role="img" aria-label="Successful and failed AI requests"></canvas></div></article>
+            <article class="card"><div class="card-head"><h3>Downloads</h3></div><div class="chart-box"><canvas id="ad-dl" role="img" aria-label="CSV and report downloads"></canvas></div></article>
+            <article class="card"><div class="card-head"><h3>Feature usage</h3></div><div class="chart-box"><canvas id="ad-features" role="img" aria-label="Feature usage"></canvas></div></article>
+            <article class="card"><div class="card-head"><h3>AI chat topics</h3></div><div class="chart-box"><canvas id="ad-topics" role="img" aria-label="AI chat topics"></canvas></div><div id="ad-topics-empty"></div></article>
+          </div>
+          <div class="grid two">
+            <article class="card"><div class="card-head"><h3>AI usage by user</h3></div><div class="table-wrap"><table class="table" id="ad-topusers"></table></div><div id="ad-topusers-empty"></div></article>
+            <article class="card"><div class="card-head"><h3>Recent sign-ups</h3></div><div class="table-wrap"><table class="table" id="ad-recent"></table></div></article>
+          </div>
+          <article class="card"><h3>How these numbers are counted</h3><ul class="explain" id="ad-defs"></ul></article>
+        </section>
+
+        <section class="view" data-view="admin-users" hidden>
+          <div class="page-head"><div><h2>User management</h2><p class="muted" id="au-count"></p></div>
+            <div class="head-actions"><label class="sr-only" for="au-search">Search users</label><input id="au-search" class="input input-sm" type="search" placeholder="Search username or email…"></div></div>
+          <article class="card"><div class="table-wrap"><table class="table" id="au-table"></table></div></article>
+        </section>
+
+        <section class="view" data-view="admin-logs" hidden>
+          <div class="page-head"><div><h2>System logs</h2><p class="muted">Recent events. Only safe metadata is stored; no CSV contents or chat text.</p></div>
+            <div class="head-actions"><label class="sr-only" for="al-filter">Filter events</label><select id="al-filter" class="select"><option value="all">All events</option><option value="failed">AI failures and blocks</option></select></div></div>
+          <article class="card"><div class="table-wrap"><table class="table" id="al-table"></table></div></article>
+        </section>
+
+      </main>
+
+      <footer class="app-footer">
+        <img src="{{ url_for('static', filename='image/logo.png') }}" alt="" width="18" height="18">
+        <span>DataLens</span><span class="dim">Smarter data. Better decisions.</span>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ===================== DIALOGS ===================== -->
+  <dialog id="dlg-confirm" class="dialog" aria-labelledby="dlg-confirm-title">
+    <form method="dialog" class="dialog-body">
+      <h3 id="dlg-confirm-title">Are you sure?</h3>
+      <p id="dlg-confirm-text" class="muted"></p>
+      <div class="dialog-actions"><button class="btn btn-soft" value="cancel">Cancel</button><button class="btn btn-danger" value="ok" id="dlg-confirm-ok">Confirm</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="dlg-prompt" class="dialog" aria-labelledby="dlg-prompt-title">
+    <form method="dialog" class="dialog-body" id="dlg-prompt-form">
+      <h3 id="dlg-prompt-title">Enter a value</h3>
+      <p id="dlg-prompt-text" class="muted"></p>
+      <div class="field"><label for="dlg-prompt-input" id="dlg-prompt-label">Value</label><input id="dlg-prompt-input" type="text" maxlength="120"><p class="field-error" id="dlg-prompt-error"></p></div>
+      <div class="dialog-actions"><button class="btn btn-soft" value="cancel" formnovalidate>Cancel</button><button class="btn btn-primary" value="ok" id="dlg-prompt-ok">Save</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="dlg-row" class="dialog dialog-wide" aria-labelledby="dlg-row-title">
+    <div class="dialog-body">
+      <div class="card-head"><h3 id="dlg-row-title">Row details</h3><button type="button" class="icon-btn" data-close-dialog="dlg-row" aria-label="Close"><i data-lucide="x"></i></button></div>
+      <div id="dlg-row-body" class="row-detail"></div>
+    </div>
+  </dialog>
+
+  <dialog id="dlg-force-pw" class="dialog" aria-labelledby="dlg-force-title">
+    <form class="dialog-body form" id="force-pw-form" novalidate>
+      <h3 id="dlg-force-title">Choose a new password</h3>
+      <p class="muted">For security, you need to set a new password before continuing.</p>
+      <div class="form-alert" data-form-alert hidden role="alert"></div>
+      <div class="field"><label for="fp-current">Current password</label><input id="fp-current" name="current_password" type="password" autocomplete="current-password"><p class="field-error" data-error-for="current_password"></p></div>
+      <div class="field"><label for="fp-new">New password</label><input id="fp-new" name="new_password" type="password" autocomplete="new-password"><p class="field-error" data-error-for="new_password"></p></div>
+      <div class="field"><label for="fp-confirm">Confirm new password</label><input id="fp-confirm" name="confirm_password" type="password" autocomplete="new-password"><p class="field-error" data-error-for="confirm_password"></p></div>
+      <div class="dialog-actions"><button type="button" class="btn btn-soft" data-action="logout">Log out</button><button class="btn btn-primary" type="submit"><span class="btn-label">Update password</span></button></div>
+    </form>
+  </dialog>
+
+  <dialog id="dlg-secret" class="dialog" aria-labelledby="dlg-secret-title">
+    <div class="dialog-body">
+      <h3 id="dlg-secret-title">Your new API key</h3>
+      <p class="muted" id="dlg-secret-note"></p>
+      <pre class="code-block"><code id="dlg-secret-val"></code></pre>
+      <div class="dialog-actions"><button type="button" class="btn btn-soft" id="dlg-secret-copy"><i data-lucide="copy"></i>Copy key</button><button type="button" class="btn btn-primary" data-close-dialog="dlg-secret">I've saved it</button></div>
+    </div>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+</body>
+</html>
