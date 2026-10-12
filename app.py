@@ -154,11 +154,23 @@ RETIRED_GROQ_MODELS = {
     "deepseek-r1-distill-llama-70b": "openai/gpt-oss-120b",
 }
 
+def database_uri():
+    """Database URL from the environment. Hosts such as Render/Heroku may hand out 'postgres://',
+    which SQLAlchemy 2 rejects, so it is rewritten to 'postgresql://'. Falls back to local SQLite."""
+    url = os.environ.get("DATABASE_URL", "").strip()
+    if not url:
+        return "sqlite:///" + os.path.join(INSTANCE_DIR, "datalens.db").replace("\\", "/")
+    if url.startswith("postgres://"):
+        url = "postgresql://" + url[len("postgres://"):]
+    return url
+
+
 app = Flask(__name__, static_folder="static", template_folder="templates")
 app.config.update(
     SECRET_KEY=load_secret_key(),
-    SQLALCHEMY_DATABASE_URI=os.environ.get("DATABASE_URL")
-    or "sqlite:///" + os.path.join(INSTANCE_DIR, "datalens.db").replace("\\", "/"),
+    SQLALCHEMY_DATABASE_URI=database_uri(),
+    # Drop dead connections instead of failing after the database restarts or idles (Postgres on a host).
+    SQLALCHEMY_ENGINE_OPTIONS={"pool_pre_ping": True, "pool_recycle": 280},
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
     MAX_CONTENT_LENGTH=env_int("MAX_CONTENT_LENGTH", 25 * 1024 * 1024),
     SESSION_COOKIE_HTTPONLY=True,
