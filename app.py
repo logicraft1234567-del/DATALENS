@@ -155,13 +155,17 @@ RETIRED_GROQ_MODELS = {
 }
 
 def database_uri():
-    """Database URL from the environment. Hosts such as Render/Heroku may hand out 'postgres://',
-    which SQLAlchemy 2 rejects, so it is rewritten to 'postgresql://'. Falls back to local SQLite."""
+    """Database URL from the environment, falling back to local SQLite.
+
+    Hosts such as Render hand out 'postgres://' or 'postgresql://'. SQLAlchemy 2.1+ would pick the newer
+    'psycopg' (v3) driver for those, but this project installs psycopg2, so the driver is named explicitly.
+    """
     url = os.environ.get("DATABASE_URL", "").strip()
     if not url:
         return "sqlite:///" + os.path.join(INSTANCE_DIR, "datalens.db").replace("\\", "/")
-    if url.startswith("postgres://"):
-        url = "postgresql://" + url[len("postgres://"):]
+    for prefix in ("postgres://", "postgresql://"):
+        if url.startswith(prefix):
+            return "postgresql+psycopg2://" + url[len(prefix):]
     return url
 
 
