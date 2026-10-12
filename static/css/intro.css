@@ -1,0 +1,155 @@
+/* ==========================================================================
+   DataLens cinematic intro
+   Warp-speed data stream -> vortex -> lens forms -> impact + glitch wordmark
+   -> camera flies through the lens into the site.
+   Drawn by intro.js; this file only holds the overlay, HUD and type.
+   ========================================================================== */
+
+html.intro-skip #intro { display: none !important; }
+html.intro-active,
+html.intro-active body { overflow: hidden; }
+
+.intro {
+  position: fixed; inset: 0; z-index: 1000; overflow: hidden;
+  background: #03080b; color: #f1f7f6;
+  font-family: var(--font, "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
+  --cx: 50%; --cy: 43%; --r: 0px;
+  /* The "lens": a circular hole that grows to reveal the real page underneath */
+  -webkit-mask-image: radial-gradient(circle at var(--cx) var(--cy), transparent var(--r), #000 calc(var(--r) + 1.5px));
+          mask-image: radial-gradient(circle at var(--cx) var(--cy), transparent var(--r), #000 calc(var(--r) + 1.5px));
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  /* Failsafe: if the script never runs, the overlay removes itself */
+  animation: introFailsafe 0.01s linear 12s forwards;
+}
+@keyframes introFailsafe { to { opacity: 0; visibility: hidden; pointer-events: none; } }
+
+/* Vignette + faint scanlines */
+.intro::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 5;
+  background:
+    radial-gradient(ellipse at 50% 45%, transparent 38%, rgba(0, 0, 0, .7) 100%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, .028) 0 1px, transparent 1px 3px);
+}
+
+.intro-stage { position: absolute; inset: 0; will-change: transform; }
+.intro-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+/* ---------- Logo in the lens ---------- */
+.intro-logo {
+  position: absolute; left: 50%; top: var(--cy); width: 84px; height: auto; max-width: none;
+  transform: translate(-50%, -50%) scale(.2); opacity: 0; pointer-events: none;
+  filter: drop-shadow(0 0 18px rgba(45, 226, 196, .85));
+}
+
+/* ---------- Wordmark ---------- */
+.intro-word {
+  position: absolute; left: 50%; top: 62%;
+  transform: translate(-50%, -50%);
+  display: flex; white-space: nowrap; pointer-events: none;
+  font-weight: 800; font-size: 72px; line-height: 1; letter-spacing: -.02em;
+  color: #fff; opacity: 0;
+  text-shadow: 0 0 22px rgba(45, 226, 196, .7), 0 0 64px rgba(45, 226, 196, .35);
+}
+.intro-word.on { opacity: 1; }
+.intro-word span { display: inline-block; text-align: center; }
+.intro-word span.s { color: #7bf7e6; }
+/* RGB-split ghost layers */
+.intro-word::before,
+.intro-word::after {
+  content: attr(data-text); position: absolute; left: 0; right: 0; top: 0;
+  display: flex; justify-content: center; pointer-events: none;
+  mix-blend-mode: screen; opacity: 0; text-shadow: none;
+}
+.intro-word.on::before { color: #00e5ff; animation: introGlitchA 1s steps(1, end) forwards; }
+.intro-word.on::after  { color: #ff2d75; animation: introGlitchB 1s steps(1, end) forwards; }
+@keyframes introGlitchA {
+  0%   { opacity: .95; transform: translate(-7px, 0);   clip-path: inset(10% 0 60% 0); }
+  14%  { transform: translate(6px, -2px);  clip-path: inset(55% 0 10% 0); }
+  28%  { transform: translate(-9px, 1px);  clip-path: inset(28% 0 38% 0); }
+  42%  { transform: translate(5px, 0);     clip-path: inset(72% 0 0 0); }
+  58%  { transform: translate(-4px, 0);    clip-path: inset(0 0 74% 0); }
+  74%  { opacity: .55; transform: translate(3px, 0); clip-path: inset(40% 0 40% 0); }
+  100% { opacity: 0; transform: none; clip-path: none; }
+}
+@keyframes introGlitchB {
+  0%   { opacity: .95; transform: translate(7px, 0);    clip-path: inset(62% 0 8% 0); }
+  14%  { transform: translate(-6px, 2px);  clip-path: inset(8% 0 62% 0); }
+  28%  { transform: translate(9px, -1px);  clip-path: inset(44% 0 22% 0); }
+  42%  { transform: translate(-5px, 0);    clip-path: inset(0 0 80% 0); }
+  58%  { transform: translate(4px, 0);     clip-path: inset(68% 0 0 0); }
+  74%  { opacity: .55; transform: translate(-3px, 0); clip-path: inset(22% 0 54% 0); }
+  100% { opacity: 0; transform: none; clip-path: none; }
+}
+
+/* ---------- Tagline ---------- */
+.intro-tag {
+  position: absolute; left: 50%; top: 74%; margin: 0;
+  transform: translate(-50%, 0); white-space: nowrap; pointer-events: none;
+  font-weight: 500; font-size: 14px; letter-spacing: .3em; text-transform: uppercase;
+  color: #9db2b0; opacity: 0;
+}
+.intro-tag.on { animation: introTag 1s cubic-bezier(.2, .8, .2, 1) forwards; }
+@keyframes introTag {
+  from { opacity: 0; letter-spacing: .75em; filter: blur(6px); }
+  to   { opacity: 1; letter-spacing: .3em;  filter: blur(0); }
+}
+
+/* ---------- HUD ---------- */
+.intro-c {
+  position: absolute; z-index: 6; width: 24px; height: 24px; pointer-events: none;
+  border: 1.5px solid rgba(45, 226, 196, .75); opacity: 0;
+  animation: introHud .7s cubic-bezier(.2, .8, .2, 1) .15s forwards;
+}
+.intro-c.tl { top: calc(16px + env(safe-area-inset-top, 0px));    left: 16px;  border-right: 0; border-bottom: 0; }
+.intro-c.tr { top: calc(16px + env(safe-area-inset-top, 0px));    right: 16px; border-left: 0;  border-bottom: 0; }
+.intro-c.bl { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); left: 16px;  border-right: 0; border-top: 0; }
+.intro-c.br { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); right: 16px; border-left: 0;  border-top: 0; }
+@keyframes introHud { from { opacity: 0; transform: scale(2.4); } to { opacity: 1; transform: none; } }
+
+.intro-status, .intro-count {
+  position: absolute; z-index: 6; margin: 0; pointer-events: none;
+  bottom: calc(30px + env(safe-area-inset-bottom, 0px));
+  font: 600 11px/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: .16em; color: #7bf7e6; text-shadow: 0 0 12px rgba(45, 226, 196, .6);
+}
+.intro-status { left: 32px; }
+.intro-status span::after { content: "\2588"; margin-left: 6px; animation: introBlink .7s steps(1) infinite; }
+.intro-count { right: 32px; }
+@keyframes introBlink { 50% { opacity: 0; } }
+
+.intro-skip {
+  position: absolute; z-index: 7; right: 18px;
+  top: calc(52px + env(safe-area-inset-top, 0px));
+  appearance: none; cursor: pointer; border-radius: 99px; padding: 7px 14px;
+  font: 600 12px/1 var(--font, "Inter", system-ui, sans-serif); letter-spacing: .06em;
+  color: #cfeee9; background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(150, 255, 235, .22);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  opacity: 0; animation: introHud .6s ease .6s forwards;
+  transition: background-color .15s, border-color .15s;
+}
+.intro-skip:hover, .intro-skip:focus-visible { background: rgba(45, 226, 196, .16); border-color: rgba(45, 226, 196, .6); }
+.intro-skip:focus-visible { outline: 2px solid #2de2c4; outline-offset: 2px; }
+
+/* ---------- Page settles in as the lens opens ---------- */
+html.intro-reveal #auth-screen,
+html.intro-reveal #app-shell {
+  transform-origin: 50% 43%;
+  animation: introPageIn 1.1s cubic-bezier(.16, .8, .2, 1) backwards;
+}
+@keyframes introPageIn { from { transform: scale(1.14); filter: blur(10px) saturate(1.5); } }
+
+@media (max-width: 480px) {
+  .intro-status, .intro-count { font-size: 10px; letter-spacing: .12em; }
+  .intro-status { left: 26px; } .intro-count { right: 26px; }
+  .intro-tag { font-size: 10.5px; letter-spacing: .24em; }
+  @keyframes introTag {
+    from { opacity: 0; letter-spacing: .6em; filter: blur(6px); }
+    to   { opacity: 1; letter-spacing: .24em; filter: blur(0); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro { display: none !important; }
+}

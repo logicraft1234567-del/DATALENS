@@ -12,8 +12,38 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/intro.css') }}">
+  <script>
+    /* Decide before first paint whether the cinematic intro plays (once per session; add ?intro to force) */
+    (function () {
+      var c = document.documentElement.classList;
+      try {
+        var seen = sessionStorage.getItem('dl_intro_seen') === '1';
+        var forced = /[?&]intro(=|&|$)/.test(location.search);
+        var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+        c.add((seen && !forced) || reduce ? 'intro-skip' : 'intro-active');
+      } catch (e) { c.add('intro-active'); }
+    })();
+  </script>
+  <noscript><style>#intro { display: none !important; }</style></noscript>
 </head>
 <body>
+  <!-- ===================== CINEMATIC INTRO ===================== -->
+  <div id="intro" class="intro" role="dialog" aria-modal="true" aria-label="DataLens intro animation">
+    <div class="intro-stage">
+      <canvas class="intro-canvas" aria-hidden="true"></canvas>
+      <img class="intro-logo" src="{{ url_for('static', filename='image/logo.png') }}" alt="" width="84" height="84">
+      <div class="intro-word" aria-hidden="true"></div>
+      <p class="intro-tag" aria-hidden="true">Smarter data. Better decisions.</p>
+    </div>
+    <i class="intro-c tl" aria-hidden="true"></i><i class="intro-c tr" aria-hidden="true"></i>
+    <i class="intro-c bl" aria-hidden="true"></i><i class="intro-c br" aria-hidden="true"></i>
+    <p class="intro-status" aria-hidden="true"><span></span></p>
+    <p class="intro-count" aria-hidden="true">000%</p>
+    <button type="button" class="intro-skip">Skip <span aria-hidden="true">&rsaquo;</span></button>
+  </div>
+  <script src="{{ url_for('static', filename='js/intro.js') }}"></script>
+
   <a class="skip-link" href="#content">Skip to content</a>
   <div id="toasts" class="toasts" role="status" aria-live="polite"></div>
 
